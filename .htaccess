@@ -1,0 +1,17 @@
+RewriteEngine On
+
+# Batasi akses langsung ke '/config' dan tampilkan pesan Forbidden
+RewriteCond %{THE_REQUEST} /config [NC]
+RewriteRule .* - [F,L]
+
+# Batasi akses langsung ke '/api' dan tampilkan pesan Forbidden
+RewriteRule ^api$ - [F]
+
+# Batasi akses langsung ke '/route' dan tampilkan pesan Forbidden
+RewriteCond %{THE_REQUEST} /route [NC]
+RewriteRule .* - [F,L]
+
+# Aturan untuk mengarahkan permintaan ke '/api/...'
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ route/api.php [L]
