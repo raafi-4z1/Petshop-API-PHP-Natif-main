@@ -6,10 +6,9 @@ class Penitipan {
         $conn = getConnection();
         
         try {
-            $query = "SELECT penitipan.nama_lengkap, penitipan.tanggal_masuk, penitipan.tanggal_keluar, 
-                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.id_transaksi
-                        FROM penitipan INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan LEFT JOIN transaksi 
-                        ON transaksi.id_hewan = hewan.id_hewan WHERE penitipan.id_user = '$id_user' ORDER BY hewan.`datetime` DESC";
+            $query = "SELECT penitipan.id_penitipan, hewan.nama_hewan, hewan.datetime
+                        FROM penitipan INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan
+                        WHERE penitipan.id_user = '$id_user' ORDER BY hewan.`datetime` DESC";
             $result = mysqli_query($conn, $query);
             
             if ($result) {

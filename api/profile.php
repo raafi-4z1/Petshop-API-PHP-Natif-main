@@ -1,5 +1,37 @@
 <?php
 class Profile {
+    function index($user) {
+        $user = json_decode($user, true);
+        $id_user = $user['data']['id'];
+
+        try {
+            $conn = getConnection();
+            $data = [];
+
+            $queries = [
+                "penitipan" => "SELECT COUNT(id_user) AS jumlah FROM penitipan WHERE id_user = '$id_user'",
+                "pemesanan" => "SELECT COUNT(id_user) AS jumlah FROM pemesanan WHERE id_user = '$id_user'",
+                "transaksi" => "SELECT COUNT(id_user) AS jumlah FROM transaksi WHERE id_user = '$id_user'"
+            ];
+            
+            foreach ($queries as $key => $query) {
+                $result = mysqli_query($conn, $query);
+                if (!$result) {
+                    mysqli_close($conn);
+                    return error(mysqli_error($conn));
+                }
+
+                $data[$key] = mysqli_fetch_assoc($result)['jumlah'];
+            }
+
+            mysqli_close($conn);
+            return success($data);
+
+        } catch (mysqli_sql_exception $e) {
+            return error(strval($e));
+        }
+    }
+
     function updateProfile($user) {
         try {
             if (isset($_POST['full_name'], $_POST['email'], $_POST['phone'], $_POST['alamat']) && !empty($_POST['full_name']) &&

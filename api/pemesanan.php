@@ -6,10 +6,9 @@ class Pemesanan {
         $conn = getConnection();
         
         try {
-            $query = "SELECT pemesanan.nama_lengkap, pemesanan.tanggal_pemesanan, 
-                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.id_transaksi
-                        FROM pemesanan INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan LEFT JOIN transaksi 
-                        ON transaksi.id_hewan = hewan.id_hewan WHERE pemesanan.id_user = '$id_user' ORDER BY hewan.`datetime` DESC
+            $query = "SELECT pemesanan.id_pemesanan, hewan.nama_hewan, hewan.datetime
+                        FROM pemesanan INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan
+                        WHERE pemesanan.id_user = '$id_user' ORDER BY hewan.`datetime` DESC
             ";
             $result = mysqli_query($conn, $query);
             

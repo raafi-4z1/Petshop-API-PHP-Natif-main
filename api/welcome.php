@@ -1,5 +1,5 @@
 <?php
-class Welcome {    
+class Welcome {
     function login() {
         try {
             if (isset($_POST['username'], $_POST['password']) && !empty($_POST['username']) && !empty($_POST['password']))
@@ -38,7 +38,7 @@ class Welcome {
 
                 } else {
                     mysqli_close($conn);
-                    return error($result);
+                    return error("Username atau Password anda salah");
                 }
                 
             } else {

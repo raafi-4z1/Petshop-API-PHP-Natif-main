@@ -8,11 +8,13 @@
     include('../api/profile.php');
     include('../api/penitipan.php');
     include('../api/pemesanan.php');
+    include('../api/transaksi.php');
 
     $welcome = new Welcome();
     $profile = new Profile();
     $penitipan = new Penitipan();
     $pemesanan = new Pemesanan();
+    $transaksi = new Transaksi();
 
     $request_path = $_SERVER['REQUEST_URI'];
     $base_path = $petshop_dir . '/api';
@@ -68,6 +70,14 @@
                         }
 
                         break;
+                    case '/profile':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $profile->index($token_api);
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
                     case '/updateprofile':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo $profile->updateProfile($token_api);
@@ -111,6 +121,30 @@
                     case '/viewpemesanan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo $pemesanan->index($token_api);
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
+                    case '/viewtransaksi':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $transaksi->index($token_api);
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
+                    case '/listpembayaran':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $transaksi->listPembayaran($token_api);
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
+                    case '/viewbyidtransaksi':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $transaksi->viewByIdTransaksi($token_api);
                         } else {
                             invalidHTTP();
                         }
