@@ -12,13 +12,17 @@ class Penitipan {
             $result = mysqli_query($conn, $query);
             
             if ($result) {
-                mysqli_close($conn);
-
+                if (mysqli_num_rows($result) == 0) {
+                    mysqli_close($conn);
+                    return success($result, 204);
+                }
+                
                 $data = array();
                 while ($row = mysqli_fetch_assoc($result)) {
                     $data[] = $row;
                 }
-
+                
+                mysqli_close($conn);
                 return success($data);
             } else {
                 mysqli_close($conn);
@@ -54,14 +58,13 @@ class Penitipan {
                             VALUE ('$id_user', '$jenis_hewan', '$nama_hewan', '$jumlah', '$now')";
 
                 if (mysqli_query($conn, $query)) {
-                    $id_hewan = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id_hewan FROM hewan WHERE id_user = '$id_user' 
-                                    ORDER BY id_hewan DESC LIMIT 1"))['id_hewan'];
+                    $id_hewan = mysqli_insert_id($conn);
                     $query = "INSERT INTO penitipan (id_user, id_hewan, nama_lengkap, nama_hewan, tanggal_masuk, tanggal_keluar) 
                                 VALUE ('$id_user', '$id_hewan', '$full_name', '$nama_hewan', '$tgl_masuk', '$tgl_keluar')";
                     
                     if (mysqli_query($conn, $query)) {
                         mysqli_close($conn);
-                        return success("Berhasil diinput, tunggu admin mengkonfirmasi dan lakukan pembayaran");
+                        return success("Berhasil diinput, tunggu admin mengkonfirmasi dan lakukan pembayaran", 201);
                     } else {
                         mysqli_close($conn);
                         return error(mysqli_error($conn));
@@ -73,7 +76,7 @@ class Penitipan {
                 }
 
             } else {
-                return error("Tidak boleh ada yang kosong");
+                return error("Tidak boleh ada yang kosong", 400);
             }
             
         } catch (mysqli_sql_exception $e) {

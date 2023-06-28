@@ -33,16 +33,16 @@ class Welcome {
 
                     } else {
                         mysqli_close($conn);
-                        return error("Username atau Password anda salah");
+                        return error("Username atau Password anda salah", 400);
                     }
 
                 } else {
                     mysqli_close($conn);
-                    return error("Username atau Password anda salah");
+                    return error("Username atau Password anda salah", 400);
                 }
                 
             } else {
-                return error("Tidak boleh ada yang kosong");
+                return error("Tidak boleh ada yang kosong", 400);
             }
 
         } catch (mysqli_sql_exception $e) {
@@ -77,14 +77,13 @@ class Welcome {
                     VALUES ('$name', '$username', '$password', 'user', '$now_local', '$token_hash')";
                     
                     if (mysqli_query($conn, $query)) {
-                        $id_user = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM `login` 
-                                    WHERE username = '$username' LIMIT 1"))['id'];
+                        $id_user = mysqli_insert_id($conn); 
                         $query = "INSERT INTO `user` (id_user, username,  nama_lengkap,  telepon)
                                     VALUES ('$id_user', '$username', '$name', '$phone')";
                         
                         if (mysqli_query($conn, $query)) {
                             mysqli_close($conn);
-                            return success($result);
+                            return success($result, 201);
                         } else {
                             mysqli_close($conn);
                             return error(mysqli_error($conn));
@@ -96,11 +95,11 @@ class Welcome {
                     }
                     
                 } else {
-                    return error("Password dan Confirm Password harus sama");
+                    return error("Password dan Confirm Password harus sama", 400);
                 }
 
             } else {
-                return error("Tidak boleh ada yang kosong");
+                return error("Tidak boleh ada yang kosong", 400);
             }
             
         } catch (mysqli_sql_exception $e) {

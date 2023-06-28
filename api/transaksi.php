@@ -12,13 +12,17 @@ class Transaksi {
             $result = mysqli_query($conn, $query);
             
             if ($result) {
-                mysqli_close($conn);
+                if (mysqli_num_rows($result) == 0) {
+                    mysqli_close($conn);
+                    return success($result, 204);
+                }
 
                 $data = array();
                 while ($row = mysqli_fetch_assoc($result)) {
                     $data[] = $row;
                 }
-
+                
+                mysqli_close($conn);
                 return success($data);
             } else {
                 mysqli_close($conn);
@@ -53,6 +57,11 @@ class Transaksi {
                 $result = mysqli_query($conn, $query);
 
                 if ($result) {
+                    if (mysqli_num_rows($result) == 0) {
+                        mysqli_close($conn);
+                        return success($result, 204);
+                    }
+
                     while ($row = mysqli_fetch_assoc($result)) {
                         $data[] = $row;
                     }
@@ -65,7 +74,7 @@ class Transaksi {
                 }
 
             } else {
-                return error("Tidak boleh ada yang kosong");
+                return error("Tidak boleh ada yang kosong", 400);
             }
 
         }  catch (mysqli_sql_exception $e) {

@@ -66,7 +66,7 @@ class Profile {
                 }
 
             } else {
-                return error("Tidak boleh ada yang kosong");
+                return error("Tidak boleh ada yang kosong", 400);
             }
         } catch (mysqli_sql_exception $e) {
             return error(strval($e));
@@ -106,7 +106,7 @@ class Profile {
 
                         } else {
                             mysqli_close($conn);
-                            return error("Password lama anda salah");
+                            return error("Password lama anda salah", 400);
                         }
 
                     } else {
@@ -115,11 +115,11 @@ class Profile {
                     }
                     
                 } else {
-                    return error("Password dan Confirm Password harus sama");
+                    return error("Password dan Confirm Password harus sama", 400);
                 }
 
             } else {
-                return error("Tidak boleh ada yang kosong");
+                return error("Tidak boleh ada yang kosong", 400);
             }
         } catch (mysqli_sql_exception $e) {
             return error(strval($e));

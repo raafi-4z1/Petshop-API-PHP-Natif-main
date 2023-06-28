@@ -1,14 +1,11 @@
 <?php
-    $path =  str_replace('\route', '', __DIR__);
-    $petshop_dir = str_replace('\\', '/', $path);
-    $petshop_dir = str_replace($_SERVER['DOCUMENT_ROOT'], '', $petshop_dir);
-
-    include('../config/api.php');
-    include('../api/welcome.php');
-    include('../api/profile.php');
-    include('../api/penitipan.php');
-    include('../api/pemesanan.php');
-    include('../api/transaksi.php');
+    include('../config/Api.php');
+    include('../config/ApiHelper.php');
+    include('../api/Welcome.php');
+    include('../api/Profile.php');
+    include('../api/Penitipan.php');
+    include('../api/Pemesanan.php');
+    include('../api/Transaksi.php');
 
     $welcome = new Welcome();
     $profile = new Profile();
@@ -16,8 +13,9 @@
     $pemesanan = new Pemesanan();
     $transaksi = new Transaksi();
 
-    $request_path = $_SERVER['REQUEST_URI'];
-    $base_path = $petshop_dir . '/api';
+    $petshop_dir = strtolower('/petshop%20-%20Copy/Petshop-API-PHP-Natif-main'); // ? hapus jika tidak diperlukan. ('Nama Folder root')
+    $request_path = strtolower($_SERVER['REQUEST_URI']); // * cek!!! apakah sever menerima request seperti /api/...
+    $base_path = $petshop_dir . '/api'; // ? '$petshop_dir', hapus jika tidak diperlukan
     $sub_user = '/user';
     
     $api_path = str_replace($base_path, '', $request_path);
