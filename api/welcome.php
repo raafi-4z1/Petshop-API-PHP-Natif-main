@@ -108,8 +108,7 @@ class Welcome {
     }
 
     function logout($user) {
-        $user = json_decode($user, true);
-        $id_user = $user['data']['id'];
+        $id_user = $user->data->id;
         $now = timeZone();
         
         try {

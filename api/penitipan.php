@@ -1,12 +1,11 @@
 <?php
 class Penitipan {
     function index($user) {
-        $user = json_decode($user, true);
-        $id_user = $user['data']['id'];
+        $id_user = $user->data->id;
         $conn = getConnection();
         
         try {
-            $query = "SELECT penitipan.id_penitipan, hewan.nama_hewan, hewan.datetime
+            $query = "SELECT hewan.id_hewan, penitipan.id_penitipan, hewan.nama_hewan, hewan.datetime
                         FROM penitipan INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan
                         WHERE penitipan.id_user = '$id_user' ORDER BY hewan.`datetime` DESC";
             $result = mysqli_query($conn, $query);
@@ -48,10 +47,9 @@ class Penitipan {
                 
                 $tgl_masuk = $_POST['tgl_masuk'];
                 $tgl_keluar = $_POST['tgl_keluar'];
+                
                 $now = timeZone();
-
-                $user = json_decode($user, true);
-                $id_user = $user['data']['id'];
+                $id_user = $user->data->id;
 
                 $conn = getConnection();
                 $query = "INSERT INTO hewan (id_user, jenis, nama_hewan, jumlah, `datetime`) 

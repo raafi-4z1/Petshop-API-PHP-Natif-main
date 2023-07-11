@@ -5,12 +5,14 @@
     include('../api/Profile.php');
     include('../api/Penitipan.php');
     include('../api/Pemesanan.php');
+    include('../api/DetailItem.php');
     include('../api/Transaksi.php');
 
     $welcome = new Welcome();
     $profile = new Profile();
     $penitipan = new Penitipan();
     $pemesanan = new Pemesanan();
+    $detailitem = new DetailItem();
     $transaksi = new Transaksi();
 
     $petshop_dir = strtolower('/petshop%20-%20Copy/Petshop-API-PHP-Natif-main'); // ? hapus jika tidak diperlukan. ('Nama Folder root')
@@ -50,7 +52,7 @@
             if ($token_api === null) {
                 echo error('Token tidak valid', 401);
             } else {
-                echo $welcome->logout($token_api);
+                echo $welcome->logout(json_decode($token_api));
             }
             
             break;
@@ -70,7 +72,7 @@
                         break;
                     case '/profile':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $profile->index($token_api);
+                            echo $profile->index(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -78,7 +80,7 @@
                         break;
                     case '/updateprofile':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $profile->updateProfile($token_api);
+                            echo $profile->updateProfile(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -86,7 +88,7 @@
                         break;
                     case '/updatepassword':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $profile->updatePassword($token_api);
+                            echo $profile->updatePassword(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -94,7 +96,7 @@
                         break;
                     case '/penitipan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $penitipan->store($token_api);
+                            echo $penitipan->store(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -102,7 +104,7 @@
                         break;
                     case '/viewpenitipan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $penitipan->index($token_api);
+                            echo $penitipan->index(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -110,7 +112,7 @@
                         break;
                     case '/pemesanan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $pemesanan->store($token_api);
+                            echo $pemesanan->store(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -118,7 +120,7 @@
                         break;
                     case '/viewpemesanan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $pemesanan->index($token_api);
+                            echo $pemesanan->index(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -126,7 +128,7 @@
                         break;
                     case '/viewtransaksi':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $transaksi->index($token_api);
+                            echo $transaksi->index(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -134,15 +136,15 @@
                         break;
                     case '/listpembayaran':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $transaksi->listPembayaran($token_api);
+                            echo $transaksi->listPembayaran(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
 
                         break;
-                    case '/viewbyidtransaksi':
+                    case '/detailitem':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $transaksi->viewByIdTransaksi($token_api);
+                            echo $detailitem->index(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }

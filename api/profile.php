@@ -1,8 +1,7 @@
 <?php
 class Profile {
     function index($user) {
-        $user = json_decode($user, true);
-        $id_user = $user['data']['id'];
+        $id_user = $user->data->id;
 
         try {
             $conn = getConnection();
@@ -42,8 +41,7 @@ class Profile {
                 $phone = $_POST['phone'];
                 $alamat = $_POST['alamat'];
 
-                $user = json_decode($user, true);
-                $id_user = $user['data']['id'];
+                $id_user = $user->data->id;
 
                 $conn = getConnection();
                 $query = "UPDATE `login` SET nama = '$full_name' WHERE id = '$id_user'";
@@ -83,8 +81,7 @@ class Profile {
                 $confirm_new_password = $_POST['confirmNewPassword'];
     
                 if ($new_password === $confirm_new_password) {
-                    $user = json_decode($user, true);
-                    $id_user = $user['data']['id'];
+                    $id_user = $user->data->id;
 
                     $conn = getConnection();
                     $query = "SELECT `password` FROM `login` WHERE id = '$id_user' LIMIT 1";
