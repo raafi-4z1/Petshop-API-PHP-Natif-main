@@ -170,6 +170,9 @@ class Transaksi {
                         { 
                             $payment_type = $n_body['va_numbers'][0]['bank'];
                             $va_number_bank = $n_body['va_numbers'][0]['va_number'];
+                        } else if (!empty($n_body['permata_va_number'])) {
+                            $payment_type = "permata";
+                            $va_number_bank = $n_body['permata_va_number'];
                         } else {
                             $payment_type = "lakukan transaksi lagi";
                             $va_number_bank = '-';
@@ -179,7 +182,7 @@ class Transaksi {
                                     va_number = '$va_number_bank', updated_at = '$now'  WHERE invoice = '$invoice'";
                     } elseif (strcmp($payment_type, "echannel") == 0) {
                         /**
-                         * ! echannel -> MANDIRI
+                         * ! echannel -> Mandiri Bill
                          * * "biller_code": "...",
                          * * "bill_key": "..."
                          * */
@@ -190,7 +193,7 @@ class Transaksi {
                             $va_number = "lakukan transaksi lagi";
                         }
 
-                        $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = 'Mandiri', 
+                        $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = 'Mandiri Bill', 
                                     va_number = '$va_number', updated_at = '$now'  WHERE invoice = '$invoice'";
                     } else {
                         $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = '$payment_type', 
