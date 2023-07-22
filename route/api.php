@@ -18,7 +18,9 @@
     $petshop_dir = strtolower('/petshop%20-%20Copy/Petshop-API-PHP-Natif-main'); // ? hapus jika tidak diperlukan. ('Nama Folder root')
     $request_path = strtolower($_SERVER['REQUEST_URI']); // * cek!!! apakah sever menerima request seperti /api/...
     $base_path = $petshop_dir . '/api'; // ? '$petshop_dir', hapus jika tidak diperlukan
+
     $sub_user = '/user';
+    $sub_midtrans = '/midtrans';
     
     $api_path = str_replace($base_path, '', $request_path);
     $api_path = rtrim($api_path, '/');
@@ -26,6 +28,12 @@
     // Route user/...
     if (strpos($api_path, $sub_user) !== false) {
         $sub_path = str_replace($sub_user, '', $api_path);
+        $api_path = str_replace($sub_path, '', $api_path);
+    }
+
+    // Route midtrans/...
+    if (strpos($api_path, $sub_midtrans) !== false) {
+        $sub_path = str_replace($sub_midtrans, '', $api_path);
         $api_path = str_replace($sub_path, '', $api_path);
     }
 
@@ -56,7 +64,39 @@
             }
             
             break;
-        case '/user':
+        case $sub_midtrans:
+            switch ($sub_path) {
+                case '/index':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        echo $transaksi->midtrans();
+                    } else {
+                        invalidHTTP();
+                    }
+
+                    break;
+                case '/charge':
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        // set response's content type as JSON
+                        header('Content-Type: application/json');
+                        // call charge API using request body passed by mobile SDK
+                        $result = $transaksi->midtransChargeAPI();
+                        // set the response http status code
+                        http_response_code($result['http_code']);
+                        // then print out the response body
+                        echo $result['body'];
+                    } else {
+                        invalidHTTP();
+                    }
+
+                    break;
+                default:
+                    invalidRoute($sub_path);
+
+                    break;
+            }
+
+            break;
+        case $sub_user:
             $token_api = cekToken();
             if ($token_api === null) {
                 echo error('Token tidak valid', 401);
@@ -110,6 +150,14 @@
                         }
 
                         break;
+                    case '/viewjadwalpenitipan':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $penitipan->index(json_decode($token_api), true);
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
                     case '/pemesanan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo $pemesanan->store(json_decode($token_api));
@@ -121,6 +169,14 @@
                     case '/viewpemesanan':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo $pemesanan->index(json_decode($token_api));
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
+                    case '/viewjadwalpemesanan':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $pemesanan->index(json_decode($token_api), true);
                         } else {
                             invalidHTTP();
                         }
@@ -142,6 +198,14 @@
                         }
 
                         break;
+                    case '/updatetransaksi':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $transaksi->transaksi(json_decode($token_api));
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
                     case '/detailitem':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             echo $detailitem->index(json_decode($token_api));
@@ -150,7 +214,14 @@
                         }
 
                         break;
-                        
+                    case '/updatecancel':
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                            echo $detailitem->updateCancel(json_decode($token_api));
+                        } else {
+                            invalidHTTP();
+                        }
+
+                        break;
                     default:
                         invalidRoute($sub_path);
 

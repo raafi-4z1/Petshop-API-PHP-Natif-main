@@ -7,12 +7,12 @@
         return json_encode($data);
     }
 
-    function timeZone()
+    function timeZone($format = 'Y-m-d H:i:s')
     {
         $timezone = new DateTimeZone('Asia/Jakarta');
         $now = new DateTime('now', $timezone);
         
-        return $now->format('Y-m-d H:i:s');
+        return $now->format($format);
     }
 
     function success($data, $code = "200")
@@ -24,7 +24,7 @@
         ], $code);
     }
 
-    function error($message, $code = 500)
+    function error($message, $code = "500")
     {
         return jsonResponse([
             'status' => 'Gagal',

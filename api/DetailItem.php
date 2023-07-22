@@ -3,26 +3,22 @@ class DetailItem {
     function index($user) {
         $id_user = $user->data->id;
         $conn = getConnection();
-
-         // di program transaksi masuk dimana tergantung id_pemesanan atau idd_penitipan
-         // dan transaksi hanya muncul jika bayar lunas
-         // begitu juga dengan penitipan dan pemesanan jika sudah melewati tanggal terakhir dari batas waktu penitipan, 
-         // jika belum maka masuk ke jadwal
+        
         $id_item = $_POST['id_hewan'];
-        // yang belum tinggal masukkan transaksi, sebelumnya dicoba dulu transaksinya untuk mengetahui
-        // lebih detail tentang cara transaksi dan pembayarannya termasuk pakai qrcode
-        // cari midtrans yg support minSdk 21
         $pemesanan = "false";
+
         if ($_POST['pemesanan']) {
             $pemesanan = "true";
-            $query = "SELECT pemesanan.nama_lengkap, pemesanan.telepon, pemesanan.tanggal_pemesanan, hewan.id_hewan,
-                        hewan.nama_hewan, hewan.jenis, hewan.jumlah, hewan.harga, transaksi.jenis_pembayaran, transaksi.created_at, transaksi.status
+            $query = "SELECT pemesanan.nama_lengkap, pemesanan.telepon, pemesanan.email, pemesanan.alamat, pemesanan.tanggal_pemesanan,
+                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.jenis_pembayaran, transaksi.harga, transaksi.va_number,
+                        transaksi.tanggal_bayar, transaksi.status, hewan.status_pesan
                         FROM pemesanan INNER JOIN `user` ON pemesanan.id_user = `user`.id_user INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan 
                         LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
                         WHERE `user`.id_user = '$id_user' AND pemesanan.id_hewan = '$id_item' LIMIT 1";
         } else {
-            $query = "SELECT penitipan.nama_lengkap, `user`.telepon, penitipan.tanggal_masuk, penitipan.tanggal_keluar, hewan.id_hewan,
-                        hewan.nama_hewan, hewan.jenis, hewan.jumlah, hewan.harga, transaksi.jenis_pembayaran, transaksi.created_at, transaksi.status
+            $query = "SELECT penitipan.nama_lengkap, `user`.telepon, `user`.email, `user`.alamat, penitipan.tanggal_masuk, penitipan.tanggal_keluar,
+                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.jenis_pembayaran, transaksi.harga, transaksi.va_number, 
+                        transaksi.tanggal_bayar, transaksi.status, hewan.status_pesan
                         FROM penitipan INNER JOIN `user` ON penitipan.id_user = `user`.id_user INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan 
                         LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
                         WHERE `user`.id_user = '$id_user' AND penitipan.id_hewan = '$id_item' LIMIT 1";
@@ -52,6 +48,34 @@ class DetailItem {
 
         } catch (mysqli_sql_exception $e) {
             mysqli_close($conn);
+            return error(strval($e));
+        }
+    }
+    
+    function updateCancel($user) {
+        try {
+            if (isset($_POST['status_pesan'], $_POST['id_hewan']) && !empty($_POST['status_pesan']) && !empty($_POST['id_hewan'])) {
+                $id_user = $user->data->id;
+                $conn = getConnection();
+                $now = timeZone();
+
+                $id_hewan = $_POST['id_hewan'];
+                $status_pesan = $_POST['status_pesan'];
+                $query = "UPDATE hewan SET status_pesan = '$status_pesan', `datetime` = '$now' WHERE id_hewan = '$id_hewan' AND id_user = '$id_user'";
+                
+                if (mysqli_query($conn, $query)) {
+                    mysqli_close($conn);
+                    return success("order berhasil di-cancel");
+                } else {
+                    mysqli_close($conn);
+                    return error(mysqli_error($conn));
+                }
+
+            } else {
+                return error("Tidak boleh ada yang kosong", 400);
+            }
+            
+        } catch (mysqli_sql_exception $e) {
             return error(strval($e));
         }
     }

@@ -1,13 +1,23 @@
 <?php
 class Pemesanan {
-    function index($user) {
+    function index($user, $jadwal = false) {
         $id_user = $user->data->id;
         $conn = getConnection();
         
         try {
-            $query = "SELECT hewan.id_hewan, pemesanan.id_pemesanan, hewan.nama_hewan, hewan.datetime
+            $now = timeZone('Y-m-d');
+
+            if ($jadwal) {
+                $query = "SELECT hewan.id_hewan, pemesanan.id_pemesanan, hewan.nama_hewan, pemesanan.tanggal_pemesanan AS `datetime`
+                        FROM pemesanan INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
+                        WHERE pemesanan.id_user = '$id_user' AND pemesanan.tanggal_pemesanan >= '$now' AND hewan.status_pesan != 'CANCEL' AND transaksi.status = 'SUCCESS'
+                        ORDER BY hewan.`datetime` DESC";
+            } else { 
+                $query = "SELECT hewan.id_hewan, pemesanan.id_pemesanan, hewan.nama_hewan, hewan.datetime
                         FROM pemesanan INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan
-                        WHERE pemesanan.id_user = '$id_user' ORDER BY hewan.`datetime` DESC";
+                        WHERE pemesanan.id_user = '$id_user' AND pemesanan.tanggal_pemesanan < '$now' AND hewan.status_pesan != 'CANCEL' ORDER BY hewan.`datetime` DESC";
+            }
+
             $result = mysqli_query($conn, $query);
             
             if ($result) {
@@ -64,9 +74,19 @@ class Pemesanan {
                     $query = "INSERT INTO pemesanan (id_user, id_hewan, nama_lengkap, tanggal_pemesanan, email, telepon, alamat) 
                                 VALUE ('$id_user', '$id_hewan', '$full_name', '$tgl_pesan', '$email', '$phone', '$alamat')";
                     
+                    $transaction_id = 'WAITING-' . $id_user . '-' . $now . '-' . $jumlah;
                     if (mysqli_query($conn, $query)) {
-                        mysqli_close($conn);
-                        return success("Berhasil diinput, tunggu admin mengkonfirmasi dan lakukan pembayaran", 201);
+                        $query = "INSERT INTO transaksi (id_user, invoice, id_hewan, transaction_id, created_at, updated_at) 
+                                VALUE ('$id_user', 'WAITING', '$id_hewan', '$transaction_id', '$now', '$now')";
+                        
+                        if (mysqli_query($conn, $query)) {
+                            mysqli_close($conn);
+                            return success("Berhasil diinput, tunggu admin mengkonfirmasi dan lakukan pembayaran", 201);
+                        } else {
+                            mysqli_close($conn);
+                            return error(mysqli_error($conn));
+                        }
+
                     } else {
                         mysqli_close($conn);
                         return error(mysqli_error($conn));
