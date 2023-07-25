@@ -6,10 +6,10 @@ class Transaksi {
         
         try {
             $now = timeZone('Y-m-d');
-            $query = "SELECT hewan.id_hewan, hewan.nama_hewan, (transaksi.`updated_at`) AS `datetime`, pemesanan.id_pemesanan, penitipan.id_penitipan
+            $query = "SELECT hewan.id_hewan, hewan.nama_hewan, hewan.status_pesan, (transaksi.`updated_at`) AS `datetime`, pemesanan.id_pemesanan, penitipan.id_penitipan, transaksi.status
                         FROM transaksi INNER JOIN hewan ON transaksi.id_hewan = hewan.id_hewan 
                         LEFT JOIN penitipan ON penitipan.id_hewan = hewan.id_hewan LEFT JOIN pemesanan ON pemesanan.id_hewan = hewan.id_hewan 
-                        WHERE transaksi.id_user = '$id_user' AND transaksi.created_at < '$now' OR hewan.status_pesan = 'CANCEL' ORDER BY transaksi.`updated_at` DESC";
+                        WHERE transaksi.id_user = '$id_user' AND (penitipan.tanggal_keluar  < '$now' OR pemesanan.tanggal_pemesanan < '$now') OR hewan.status_pesan = 'CANCEL' ORDER BY transaksi.`updated_at` DESC";
             $result = mysqli_query($conn, $query);
             
             if ($result) {
@@ -141,7 +141,7 @@ class Transaksi {
 
                 $payment_type = $n_body['payment_type'];
                 $tanggal_bayar = '2020-01-01 00:00:00';
-                $va_number_bank = '-';
+                $va_number = '-';
 
                 switch ($n_body['status_code']) {
                     case '200':
@@ -153,53 +153,68 @@ class Transaksi {
                         break;
                     case '202':
                         $status_code = "CANCEL";
+                        $tanggal_bayar = '-';
                         break;
                     }
 
                 if ($transaction_id == $transaction_id_query) {
-                    if (strcmp($payment_type, "bank_transfer") == 0) {
-                        $query = "UPDATE transaksi SET `status` = '$status_code', tanggal_bayar = '$tanggal_bayar', 
-                                    va_number = '$va_number_bank', updated_at = '$now'  WHERE transaction_id = '$transaction_id'";
-                    } else {
-                        $query = "UPDATE transaksi SET va_number = '$va_number_bank', `status` = '$status_code', tanggal_bayar = '$tanggal_bayar', updated_at = '$now'  WHERE transaction_id = '$transaction_id'";
-                    }
-                    
+                    $query = "UPDATE transaksi SET `status` = '$status_code', tanggal_bayar = '$tanggal_bayar', 
+                                va_number = '$va_number', updated_at = '$now'  WHERE transaction_id = '$transaction_id'";
                 } else {
                     if (strcmp($payment_type, "bank_transfer") == 0) {
+                        /**
+                         * ! bank_transfer -> BCA, BNI, BRI
+                         * * "['va_numbers'][0]['bank']": "...",
+                         * * "['va_numbers'][0]['va_number']": "..."
+                         * 
+                         * ! bank_transfer -> Permata
+                         * * "permata_va_number": "..."
+                         * */
                         if (!empty($n_body['va_numbers'][0]['bank']) && !empty($n_body['va_numbers'][0]['va_number']))
                         { 
                             $payment_type = $n_body['va_numbers'][0]['bank'];
-                            $va_number_bank = $n_body['va_numbers'][0]['va_number'];
+                            $va_number = $n_body['va_numbers'][0]['va_number'];
                         } else if (!empty($n_body['permata_va_number'])) {
                             $payment_type = "permata";
-                            $va_number_bank = $n_body['permata_va_number'];
+                            $va_number = $n_body['permata_va_number'];
                         } else {
                             $payment_type = "lakukan transaksi lagi";
-                            $va_number_bank = '-';
+                            $va_number = '-';
                         }
-
-                        $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = '$payment_type', 
-                                    va_number = '$va_number_bank', updated_at = '$now'  WHERE invoice = '$invoice'";
                     } elseif (strcmp($payment_type, "echannel") == 0) {
                         /**
                          * ! echannel -> Mandiri Bill
                          * * "biller_code": "...",
                          * * "bill_key": "..."
                          * */
+                        $payment_type = "Mandiri Bill";
                         if (!empty($n_body['biller_code']) && !empty($n_body['bill_key']))
                         { 
                             $va_number = '(' . $n_body['biller_code'] . ") " . $n_body['bill_key'];
                         } else {
                             $va_number = "lakukan transaksi lagi";
                         }
+                    } elseif (strcmp($payment_type, "cstore") == 0) {
+                        /**
+                         * ! cstore -> Alfa / Indo mart
+                         * * "payment_code": "..."
+                         * ! (SANDBOX) Alfa -> Product Code "merchant_id": "..."
+                         * */
+                        if (!empty($n_body['store']) && !empty($n_body['payment_code'])) {
+                            $payment_type = $n_body['store'];
+                            $va_number = $n_body['payment_code'];
 
-                        $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = 'Mandiri Bill', 
-                                    va_number = '$va_number', updated_at = '$now'  WHERE invoice = '$invoice'";
-                    } else {
-                        $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = '$payment_type', 
-                                    updated_at = '$now'  WHERE invoice = '$invoice'";
+                            if (strcmp($payment_type, "alfamart")) {
+                                $va_number = $va_number . ' (' . $n_body['merchant_id'] . ')';
+                            }
+                        } else {
+                            $payment_type = "lakukan transaksi lagi";
+                            $va_number = '-';
+                        }
                     }
-                    
+
+                    $query = "UPDATE transaksi SET transaction_id = '$transaction_id', `status` = '$status_code', jenis_pembayaran = '$payment_type', 
+                                va_number = '$va_number', updated_at = '$now'  WHERE invoice = '$invoice'";
                 }
 
                 if (mysqli_query($conn, $query)) {

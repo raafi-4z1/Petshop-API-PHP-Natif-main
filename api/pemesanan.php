@@ -14,8 +14,8 @@ class Pemesanan {
                         ORDER BY hewan.`datetime` DESC";
             } else { 
                 $query = "SELECT hewan.id_hewan, pemesanan.id_pemesanan, hewan.nama_hewan, hewan.datetime
-                        FROM pemesanan INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan
-                        WHERE pemesanan.id_user = '$id_user' AND pemesanan.tanggal_pemesanan < '$now' AND hewan.status_pesan != 'CANCEL' ORDER BY hewan.`datetime` DESC";
+                        FROM pemesanan INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
+                        WHERE pemesanan.id_user = '$id_user' AND pemesanan.tanggal_pemesanan < '$now' AND hewan.status_pesan != 'CANCEL' AND transaksi.status = 'SUCCESS' ORDER BY hewan.`datetime` DESC";
             }
 
             $result = mysqli_query($conn, $query);

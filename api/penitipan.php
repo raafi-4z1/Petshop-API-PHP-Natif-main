@@ -14,8 +14,8 @@ class Penitipan {
                         ORDER BY hewan.`datetime` DESC";
             } else {
                 $query = "SELECT hewan.id_hewan, penitipan.id_penitipan, hewan.nama_hewan, hewan.datetime
-                        FROM penitipan INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan
-                        WHERE penitipan.id_user = '$id_user' AND penitipan.tanggal_keluar < '$now' AND hewan.status_pesan != 'CANCEL' ORDER BY hewan.`datetime` DESC";
+                        FROM penitipan INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
+                        WHERE penitipan.id_user = '$id_user' AND penitipan.tanggal_keluar < '$now' AND hewan.status_pesan != 'CANCEL' AND transaksi.status = 'SUCCESS' ORDER BY hewan.`datetime` DESC";
             }
 
             $result = mysqli_query($conn, $query);

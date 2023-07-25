@@ -8,9 +8,13 @@ class Profile {
             $data = [];
 
             $queries = [
-                "penitipan" => "SELECT COUNT(id_user) AS jumlah FROM penitipan WHERE id_user = '$id_user'",
-                "pemesanan" => "SELECT COUNT(id_user) AS jumlah FROM pemesanan WHERE id_user = '$id_user'",
-                "transaksi" => "SELECT COUNT(id_user) AS jumlah FROM transaksi WHERE id_user = '$id_user'"
+                "penitipan" => "SELECT COUNT(penitipan.id_user) AS jumlah FROM penitipan INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan
+                                    INNER JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
+                                    WHERE penitipan.id_user = '$id_user' AND transaksi.status = 'SUCCESS' AND hewan.status_pesan = 'APPROVE'",
+                "pemesanan" => "SELECT COUNT(pemesanan.id_user) AS jumlah FROM pemesanan inner join hewan on pemesanan.id_hewan = hewan.id_hewan
+                                    inner join transaksi on transaksi.id_hewan = hewan.id_hewan
+                                    WHERE pemesanan.id_user = '$id_user' and transaksi.status = 'SUCCESS' and hewan.status_pesan = 'APPROVE'",
+                "transaksi" => "SELECT COUNT(id_user) AS jumlah FROM transaksi WHERE id_user = '$id_user' AND transaksi.status = 'SUCCESS'"
             ];
             
             foreach ($queries as $key => $query) {
