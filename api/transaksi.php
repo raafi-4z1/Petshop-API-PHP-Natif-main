@@ -9,7 +9,7 @@ class Transaksi {
             $query = "SELECT hewan.id_hewan, hewan.nama_hewan, hewan.status_pesan, (transaksi.`updated_at`) AS `datetime`, pemesanan.id_pemesanan, penitipan.id_penitipan, transaksi.status
                         FROM transaksi INNER JOIN hewan ON transaksi.id_hewan = hewan.id_hewan 
                         LEFT JOIN penitipan ON penitipan.id_hewan = hewan.id_hewan LEFT JOIN pemesanan ON pemesanan.id_hewan = hewan.id_hewan 
-                        WHERE transaksi.id_user = '$id_user' AND (penitipan.tanggal_keluar  < '$now' OR pemesanan.tanggal_pemesanan < '$now') OR hewan.status_pesan = 'CANCEL' ORDER BY transaksi.`updated_at` DESC";
+                        WHERE transaksi.id_user = '$id_user' AND ((penitipan.tanggal_keluar  < '$now' OR pemesanan.tanggal_pemesanan < '$now') OR hewan.status_pesan = 'CANCEL') ORDER BY transaksi.`updated_at` DESC";
             $result = mysqli_query($conn, $query);
             
             if ($result) {
@@ -190,7 +190,7 @@ class Transaksi {
                         $payment_type = "Mandiri Bill";
                         if (!empty($n_body['biller_code']) && !empty($n_body['bill_key']))
                         { 
-                            $va_number = '(' . $n_body['biller_code'] . ") " . $n_body['bill_key'];
+                            $va_number = "Biller Code (" . $n_body['biller_code'] . "), Bill Key " . $n_body['bill_key'];
                         } else {
                             $va_number = "lakukan transaksi lagi";
                         }
@@ -204,8 +204,8 @@ class Transaksi {
                             $payment_type = $n_body['store'];
                             $va_number = $n_body['payment_code'];
 
-                            if (strcmp($payment_type, "alfamart")) {
-                                $va_number = $va_number . ' (' . $n_body['merchant_id'] . ')';
+                            if (strcmp($payment_type, "alfamart") == 0) {
+                                $va_number = $va_number . ", Merchant ID (" . $n_body['merchant_id'] . ')';
                             }
                         } else {
                             $payment_type = "lakukan transaksi lagi";
