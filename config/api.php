@@ -2,8 +2,8 @@
     function getConnection()
     {
         try {
-                            // * HOST, USER, PASS, DB
-            $conn = new mysqli('localhost', 'root', '', 'id20948273_petshop');
+                                // * HOST, USER, PASS, DB
+            $conn = new mysqli('localhost', 'root', '', 'db_petshop');
             
             if ($conn->connect_error) {
                 throw new mysqli_sql_exception($conn->connect_error);

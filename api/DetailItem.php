@@ -1,7 +1,7 @@
 <?php
 class DetailItem {
     function index($user) {
-        $id_user = $user->data->id;
+        $id_user = $user->id;
         $conn = getConnection();
         
         $id_item = $_POST['id_hewan'];
@@ -10,14 +10,14 @@ class DetailItem {
         if ($_POST['pemesanan']) {
             $pemesanan = "true";
             $query = "SELECT pemesanan.nama_lengkap, pemesanan.telepon, pemesanan.email, pemesanan.alamat, pemesanan.tanggal_pemesanan,
-                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.jenis_pembayaran, transaksi.harga, transaksi.va_number,
+                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.jenis_pembayaran, pemesanan.harga, transaksi.va_number,
                         transaksi.tanggal_bayar, transaksi.status, hewan.status_pesan
                         FROM pemesanan INNER JOIN `user` ON pemesanan.id_user = `user`.id_user INNER JOIN hewan ON pemesanan.id_hewan = hewan.id_hewan 
                         LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
                         WHERE `user`.id_user = '$id_user' AND pemesanan.id_hewan = '$id_item' LIMIT 1";
         } else {
             $query = "SELECT penitipan.nama_lengkap, `user`.telepon, `user`.email, `user`.alamat, penitipan.tanggal_masuk, penitipan.tanggal_keluar,
-                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.jenis_pembayaran, transaksi.harga, transaksi.va_number, 
+                        hewan.id_hewan, hewan.nama_hewan, hewan.jenis, hewan.jumlah, transaksi.jenis_pembayaran, penitipan.harga, transaksi.va_number, 
                         transaksi.tanggal_bayar, transaksi.status, hewan.status_pesan
                         FROM penitipan INNER JOIN `user` ON penitipan.id_user = `user`.id_user INNER JOIN hewan ON penitipan.id_hewan = hewan.id_hewan 
                         LEFT JOIN transaksi ON transaksi.id_hewan = hewan.id_hewan
@@ -55,7 +55,7 @@ class DetailItem {
     function updateCancel($user) {
         try {
             if (isset($_POST['status_pesan'], $_POST['id_hewan']) && !empty($_POST['status_pesan']) && !empty($_POST['id_hewan'])) {
-                $id_user = $user->data->id;
+                $id_user = $user->id;
                 $conn = getConnection();
                 $now = timeZone();
 

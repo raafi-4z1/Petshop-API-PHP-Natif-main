@@ -15,7 +15,7 @@
     $detailitem = new DetailItem();
     $transaksi = new Transaksi();
 
-    $petshop_dir = strtolower('/petshop%20-%20Copy/Petshop-API-PHP-Natif-main'); // ? hapus jika tidak diperlukan. ('Nama Folder root')
+    $petshop_dir = strtolower('/Petshop-API-PHP-Natif-main'); // ? hapus jika tidak diperlukan. ('Nama Folder root')
     $request_path = strtolower($_SERVER['REQUEST_URI']); // * cek!!! apakah sever menerima request seperti /api/...
     $base_path = $petshop_dir . '/api'; // ? '$petshop_dir', hapus jika tidak diperlukan
 
@@ -68,7 +68,7 @@
             switch ($sub_path) {
                 case '/index':
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                        echo $transaksi->midtrans();
+                        echo $transaksi->midtrans(); // ? untuk tujuan dari Payment Notification URL
                     } else {
                         invalidHTTP();
                     }
@@ -104,7 +104,7 @@
                 switch ($sub_path) {
                     case '/home':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $token_api;
+                            echo success(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -200,7 +200,7 @@
                         break;
                     case '/updatetransaksi':
                         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            echo $transaksi->transaksi(json_decode($token_api));
+                            echo $transaksi->transaksiMidtrans(json_decode($token_api));
                         } else {
                             invalidHTTP();
                         }
@@ -288,10 +288,9 @@
 
         $query_result = mysqli_fetch_assoc(mysqli_query($conn, $query));
         mysqli_close($conn);
-        $result = $query_result['id'] ?? null;
-
-        if ($result !== null) {
-            return success($query_result);
+        
+        if ($query_result['nama_lengkap'] && isset($query_result['nama_lengkap'])) {
+            return json_encode($query_result);
         }
 
         return null;

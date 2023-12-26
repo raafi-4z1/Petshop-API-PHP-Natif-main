@@ -9,8 +9,13 @@ class Welcome {
     
                 $conn = getConnection();
                 $query = "SELECT `password` FROM `login` WHERE username = '$username' LIMIT 1";
-                $query_result = mysqli_fetch_assoc(mysqli_query($conn, $query));
-                $result = $query_result['password'] ?? null;
+                $query_result =  mysqli_fetch_assoc(mysqli_query($conn, $query));
+
+                if ($query_result['password'] && isset($query_result['password'])) {
+                    $result = $query_result['password'];
+                } else {
+                    $result = null;
+                }
                 
                 if ($result) {
                     if (password_verify($password, $result)) {
@@ -72,18 +77,34 @@ class Welcome {
                     $token_hash = hash('sha256', $token);
                     $result['token'] = $token;
                     $now_local = timeZone();
-    
-                    $query = "INSERT INTO `login` (nama, username, `password`, `level`, lastactive, token)
+                    
+                    $query = "INSERT INTO `login` (namalengkap, username, `password`, `statuslogin`, lastactive, token)
                     VALUES ('$name', '$username', '$password', 'user', '$now_local', '$token_hash')";
                     
                     if (mysqli_query($conn, $query)) {
-                        $id_user = mysqli_insert_id($conn); 
-                        $query = "INSERT INTO `user` (id_user, username,  nama_lengkap,  telepon)
-                                    VALUES ('$id_user', '$username', '$name', '$phone')";
+                        $query_result = mysqli_query($conn, "SELECT id FROM `login` WHERE username = '$username' LIMIT 1");
                         
-                        if (mysqli_query($conn, $query)) {
-                            mysqli_close($conn);
-                            return success($result, 201);
+                        if ($query_result) {
+                            $row = mysqli_fetch_assoc($query_result);
+
+                            if ($row && isset($row['id'])) {
+                                $id_user = $row['id'];
+                                $query = "INSERT INTO `user` (id_user, username,  nama_lengkap,  telepon)
+                                            VALUES ('$id_user', '$username', '$name', '$phone')";
+                                
+                                if (mysqli_query($conn, $query)) {
+                                    mysqli_close($conn);
+                                    return success($result, 201);
+                                } else {
+                                    mysqli_close($conn);
+                                    return error(mysqli_error($conn));
+                                }
+
+                            } else {
+                                mysqli_close($conn);
+                                return success($row, 204);
+                            }
+
                         } else {
                             mysqli_close($conn);
                             return error(mysqli_error($conn));
@@ -108,7 +129,7 @@ class Welcome {
     }
 
     function logout($user) {
-        $id_user = $user->data->id;
+        $id_user = $user->id;
         $now = timeZone();
         
         try {

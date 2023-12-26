@@ -1,7 +1,7 @@
 <?php
 class Transaksi {
     function index($user) {
-        $id_user = $user->data->id;
+        $id_user = $user->id;
         $conn = getConnection();
         
         try {
@@ -37,7 +37,7 @@ class Transaksi {
     }
 
     function listPembayaran($user) {
-        $id_user = $user->data->id;
+        $id_user = $user->id;
 
         try {
             $conn = getConnection();
@@ -86,16 +86,18 @@ class Transaksi {
         
     }
 
-    function transaksi($user) {
+    function transaksiMidtrans($user) {
         try {
-            if (isset($_POST['invoice'], $_POST['id_hewan']) && !empty($_POST['id_hewan']) && !empty($_POST['invoice'])) {
-                $id_user = $user->data->id;
+            if (isset($_POST['invoice'], $_POST['id_hewan'], $_POST['total_harga']) && !empty($_POST['id_hewan']) && !empty($_POST['invoice']) && !empty($_POST['total_harga'])) {
+                $id_user = $user->id;
                 $conn = getConnection();
                 $now = timeZone();
-
+                
                 $id_hewan = $_POST['id_hewan'];
                 $invoice = $_POST['invoice'];
-                $query = "UPDATE transaksi SET invoice = '$invoice', updated_at = '$now' WHERE id_hewan = '$id_hewan' AND id_user = '$id_user'";
+                $total_harga = $_POST['total_harga'];
+                
+                $query = "UPDATE transaksi SET invoice = '$invoice', total_harga = '$total_harga', updated_at = '$now' WHERE id_hewan = '$id_hewan' AND id_user = '$id_user'";
                 
                 if (mysqli_query($conn, $query)) {
                     mysqli_close($conn);
@@ -155,7 +157,7 @@ class Transaksi {
                         $status_code = "CANCEL";
                         $tanggal_bayar = '-';
                         break;
-                    }
+                }
 
                 if ($transaction_id == $transaction_id_query) {
                     $query = "UPDATE transaksi SET `status` = '$status_code', tanggal_bayar = '$tanggal_bayar', 
@@ -198,14 +200,14 @@ class Transaksi {
                         /**
                          * ! cstore -> Alfa / Indo mart
                          * * "payment_code": "..."
-                         * ! (SANDBOX) Alfa -> Product Code "merchant_id": "..."
+                         * ! (SANDBOX) Indo -> Product Code "merchant_id": "..."
                          * */
                         if (!empty($n_body['store']) && !empty($n_body['payment_code'])) {
                             $payment_type = $n_body['store'];
                             $va_number = $n_body['payment_code'];
 
-                            if (strcmp($payment_type, "alfamart") == 0) {
-                                $va_number = $va_number . ", Merchant ID (" . $n_body['merchant_id'] . ')';
+                            if (strcmp($payment_type, "alfamart")) {
+                                $va_number = $va_number . ' (' . $n_body['merchant_id'] . ')';
                             }
                         } else {
                             $payment_type = "lakukan transaksi lagi";
